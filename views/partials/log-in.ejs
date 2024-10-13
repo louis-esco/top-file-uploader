@@ -1,0 +1,15 @@
+<h2>Log in to view files</h2>
+<%- include("./errors.ejs") %>
+<form action="/log-in" method="post">
+  <label for="username">Username:</label>
+  <input
+    value="<%= username %>"
+    required
+    type="email"
+    name="username"
+    id="username"
+  />
+  <label for="password">Password:</label>
+  <input required type="password" name="password" id="password" />
+  <button type="submit">Log in</button>
+</form>

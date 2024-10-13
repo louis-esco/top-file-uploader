@@ -4,7 +4,7 @@ const session = require("express-session");
 const passport = require("passport");
 const router = require("./routes/router");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("./prisma/client");
 require("dotenv").config();
 require("./auth/passport");
 
@@ -23,7 +23,7 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24,
     },
-    store: new PrismaSessionStore(new PrismaClient(), {
+    store: new PrismaSessionStore(prisma, {
       checkPeriod: 2 * 60 * 1000,
       dbRecordIdIsSessionId: true,
       dbRecordIdFunction: undefined,

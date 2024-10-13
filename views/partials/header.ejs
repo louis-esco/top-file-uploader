@@ -1,0 +1,7 @@
+<header>
+  <% if(!locals.isAuth) { %>
+  <a href="/sign-up"><button>Sign up</button></a>
+  <% } %> <% if(locals.isAuth) { %>
+  <a href="/log-out"><button>Log out</button></a>
+  <% } %>
+</header>
