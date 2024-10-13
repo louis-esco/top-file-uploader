@@ -32,4 +32,15 @@ model Folder {
   parentId Int?
   parent   Folder?  @relation("ParentChildren", fields: [parentId], references: [id])
   children Folder[] @relation("ParentChildren")
+  file     File[]
+}
+
+model File {
+  id         Int      @id @default(autoincrement())
+  name       String
+  size       String
+  uploadTime DateTime @default(now())
+  link       String
+  folderId   Int
+  folder     Folder   @relation(fields: [folderId], references: [id])
 }
