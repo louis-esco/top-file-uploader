@@ -1,0 +1,7 @@
+<section>
+  <% folders.forEach((folder) => {%>
+  <div>Name: <%= folder.name %></div>
+  <a href="/folder/<%= folder.id %>"><button>Display content</button></a>
+  <a href="/delete-folder/<%= folder.id %>"><button>Delete folder</button></a>
+  <% }) %>
+</section>

@@ -1,4 +1,6 @@
+const db = require("../prisma/queries");
 const multer = require("multer");
+const { isAuth } = require("./authControllers");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/uploads");
@@ -19,4 +21,44 @@ const postUpload = async (req, res, next) => {
   }
 };
 
-module.exports = { postUpload };
+const postNewFolder = async (req, res, next) => {
+  try {
+    const parentId = req.params.folderId ? parseInt(req.params.folderId) : null;
+    await db.createFolder(req.body.folder, parentId);
+    res.redirect(req.get("Referrer"));
+  } catch (error) {
+    console.error("There was an error creating new folder", error);
+    next(error);
+  }
+};
+
+const getDeleteFolder = async (req, res, next) => {
+  try {
+    await db.deleteFolder(parseInt(req.params.folderId));
+    res.redirect(req.get("Referrer"));
+  } catch (error) {
+    console.error("There was an error deleting folder", error);
+    next(error);
+  }
+};
+
+const getDisplayChildrenFolders = async (req, res, next) => {
+  try {
+    const folders = await db.getChildrenFolders(parseInt(req.params.folderId));
+    res.render("index", {
+      isAuth: req.isAuthenticated(),
+      folders: folders,
+      currentFolder: req.params.folderId,
+    });
+  } catch (error) {
+    console.error("There was an error displaying children folders", error);
+    next(error);
+  }
+};
+
+module.exports = {
+  postUpload,
+  postNewFolder,
+  getDeleteFolder,
+  getDisplayChildrenFolders,
+};

@@ -21,4 +21,11 @@ router.use(authControllers.isAuth);
 
 router.post("/upload", filesControllers.postUpload);
 
+router.post("/new-folder", filesControllers.postNewFolder);
+router.post("/new-folder/:folderId", filesControllers.postNewFolder);
+
+router.get("/folder/:folderId", filesControllers.getDisplayChildrenFolders);
+
+router.get("/delete-folder/:folderId", filesControllers.getDeleteFolder);
+
 module.exports = router;

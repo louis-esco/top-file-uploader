@@ -6,9 +6,11 @@
     <title>File uploader</title>
   </head>
   <body>
-    <%- include("./partials/header.ejs") %> <%-
-    include("./partials/files-actions.ejs") %>
+    <%- include("./partials/header.ejs") %>
     <h1 class="mainTitle">File Uploader App</h1>
-    <div>Welcome to home page</div>
+    <%- include("./partials/upload-file.ejs") %> <%-
+    include("./partials/add-folder.ejs") %>
+    <h2>Browse files:</h2>
+    <%- include("./partials/display-files.ejs") %>
   </body>
 </html>
