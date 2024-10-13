@@ -67,6 +67,35 @@ module.exports = {
       next(error);
     }
   },
+  getFolderById: async (folderId) => {
+    try {
+      const folder = await prisma.folder.findUnique({
+        where: {
+          id: folderId,
+        },
+      });
+      return folder;
+    } catch (error) {
+      console.error("There was an error getting folder in db", error);
+      throw error;
+    }
+  },
+  updateFolderById: async (folderId, name) => {
+    try {
+      const folder = await prisma.folder.update({
+        where: {
+          id: folderId,
+        },
+        data: {
+          name: name,
+        },
+      });
+      return folder;
+    } catch (error) {
+      console.error("There was an error updating folder in db", error);
+      throw error;
+    }
+  },
   getFoldersByParentId: async (parentId) => {
     try {
       const folders = await prisma.folder.findMany({

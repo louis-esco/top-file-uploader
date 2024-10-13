@@ -1,6 +1,5 @@
 const db = require("../prisma/queries");
 const multer = require("multer");
-const { isAuth } = require("./authControllers");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./public/uploads");
@@ -56,9 +55,34 @@ const getDisplayChildrenFolders = async (req, res, next) => {
   }
 };
 
+const getUpdateFolder = async (req, res, next) => {
+  try {
+    const folder = await db.getFolderById(parseInt(req.params.folderId));
+    res.render("./files/update-folder", {
+      isAuth: req.isAuthenticated(),
+      folder: folder,
+    });
+  } catch (error) {
+    console.error("There was an error getting folder update form", error);
+    next(error);
+  }
+};
+
+const postUpdateFolder = async (req, res, next) => {
+  try {
+    await db.updateFolderById(parseInt(req.params.folderId), req.body.name);
+    res.redirect("/");
+  } catch (error) {
+    console.error("There was an error submitting folder update", error);
+    next(error);
+  }
+};
+
 module.exports = {
   postUpload,
   postNewFolder,
   getDeleteFolder,
   getDisplayChildrenFolders,
+  getUpdateFolder,
+  postUpdateFolder,
 };
