@@ -25,3 +25,11 @@ model User {
   username String @unique
   password String
 }
+
+model Folder {
+  id       Int      @id @default(autoincrement())
+  name     String
+  parentId Int?
+  parent   Folder?  @relation("ParentChildren", fields: [parentId], references: [id])
+  children Folder[] @relation("ParentChildren")
+}
