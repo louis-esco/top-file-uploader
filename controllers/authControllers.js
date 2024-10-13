@@ -34,7 +34,7 @@ const validateLogin = [
 ];
 
 const getSignupForm = (req, res) => {
-  res.render("sign-up", {
+  res.render("./auth/sign-up", {
     formData: {
       username: null,
     },
@@ -47,7 +47,7 @@ const postSignupForm = [
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).render("sign-up", {
+        return res.status(400).render("./auth/sign-up", {
           errors: errors.array(),
           formData: {
             username: req.body.username,
@@ -63,7 +63,62 @@ const postSignupForm = [
   },
 ];
 
+const getLogin = (req, res) => {
+  res.render("./auth/log-in", { username: null });
+};
+
+const postLogin = [
+  validateLogin,
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).render("./auth/log-in", {
+        errors: errors.array(),
+        username: req.body.username,
+      });
+    }
+    next();
+  },
+  (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        return res.status(400).render("./auth/log-in", {
+          errors: [info],
+          username: req.body.username,
+        });
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.redirect("/");
+      });
+    })(req, res, next);
+  },
+];
+
+const getLogout = (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+};
+
+const isAuth = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  res.redirect("/");
+};
+
 module.exports = {
   getSignupForm,
   postSignupForm,
+  getLogin,
+  postLogin,
+  getLogout,
+  isAuth,
 };

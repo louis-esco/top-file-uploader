@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File uploader</title>
+  </head>
+  <body>
+    <%- include("../partials/header.ejs") %>
+
+    <h2>Log in to view files</h2>
+    <%- include("../partials/errors.ejs") %>
+    <form action="/log-in" method="post">
+      <label for="username">Username:</label>
+      <input
+        value="<%= username %>"
+        required
+        type="email"
+        name="username"
+        id="username"
+      />
+      <label for="password">Password:</label>
+      <input required type="password" name="password" id="password" />
+      <button type="submit">Log in</button>
+    </form>
+  </body>
+</html>

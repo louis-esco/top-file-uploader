@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      const user = db.findUserByUsername(username);
+      const user = await db.findUserByUsername(username);
 
       // User doesn't exist
       if (!user) {
