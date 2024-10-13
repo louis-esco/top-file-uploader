@@ -21,6 +21,7 @@ router.use(authControllers.isAuth);
 
 router.post("/upload", filesControllers.postUpload);
 
+router.get("/folder", filesControllers.getDisplayRootFolders);
 router.get("/folder/:folderId", filesControllers.getDisplayChildrenFolders);
 
 router.post("/new-folder", filesControllers.postNewFolder);

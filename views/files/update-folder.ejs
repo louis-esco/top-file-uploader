@@ -7,9 +7,10 @@
   </head>
   <body>
     <h1>Update folder</h1>
+    <%- include("../partials/errors.ejs") %>
     <form action="/update-folder/<%= folder.id %>" method="post">
-      <label for="name">Folder name:</label>
-      <input type="text" name="name" id="name" value="<%= folder.name %>" />
+      <label for="folder">Folder name:</label>
+      <input type="text" name="folder" id="folder" value="<%= folder.name %>" />
       <button type="submit">Submit</button>
     </form>
   </body>
