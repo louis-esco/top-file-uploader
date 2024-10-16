@@ -20,17 +20,21 @@ router.get("/log-out", authControllers.getLogout);
 router.use(authControllers.isAuth);
 
 router.post(
-  "/upload/:folderId",
+  ["/upload", "/upload/:folderId"],
   filesControllers.postMulterUpload,
   filesControllers.postCloudinaryUpload,
   filesControllers.postFileUploadToDb
 );
 
-router.get("/folder", filesControllers.getDisplayRootFolders);
-router.get("/folder/:folderId", filesControllers.getDisplayChildrenFolders);
+router.get(
+  ["/folder", "/folder/:folderId"],
+  filesControllers.getDisplayFolderContent
+);
 
-router.post("/new-folder", filesControllers.postNewFolder);
-router.post("/new-folder/:folderId", filesControllers.postNewFolder);
+router.post(
+  ["/new-folder", "/new-folder/:folderId"],
+  filesControllers.postNewFolder
+);
 router.get("/update-folder/:folderId", filesControllers.getUpdateFolder);
 router.post("/update-folder/:folderId", filesControllers.postUpdateFolder);
 router.get("/delete-folder/:folderId", filesControllers.getDeleteFolder);

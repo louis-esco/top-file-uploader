@@ -4,13 +4,25 @@ const { multerUpload } = require("../multer/multer");
 const { cloudinary } = require("../cloudinary/cloudinary");
 
 const validateFolder = [
-  body("folder")
-    .trim()
-    .notEmpty()
-    .withMessage("Name can't be empty")
-    .isAlphanumeric("en-US", { ignore: " " })
-    .withMessage("Name must contain only letters and numbers"),
+  body("folder").trim().notEmpty().withMessage("Name can't be empty"),
 ];
+
+const getDisplayFolderContent = async (req, res, next) => {
+  try {
+    const folderId = req.params.folderId ? parseInt(req.params.folderId) : null;
+    const folders = await db.getFoldersByParentId(folderId);
+    const files = await db.getFolderFiles(folderId);
+    res.render("index", {
+      isAuth: req.isAuthenticated(),
+      folders: folders,
+      files: files,
+      currentFolder: folderId,
+    });
+  } catch (error) {
+    console.error("There was an error displaying children folders", error);
+    next(error);
+  }
+};
 
 const postMulterUpload = async (req, res, next) => {
   try {
@@ -47,8 +59,7 @@ const postCloudinaryUpload = async (req, res, next) => {
 
 const postFileUploadToDb = async (req, res, next) => {
   try {
-    const folderId =
-      req.params.folderId === "0" ? null : parseInt(req.params.folderId);
+    const folderId = req.params.folderId ? parseInt(req.params.folderId) : null;
     const dlUrl = cloudinary.url(res.locals.file.public_id, {
       flags: "attachment",
     });
@@ -71,12 +82,14 @@ const postNewFolder = [
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
+      console.log(errors);
       if (!errors.isEmpty()) {
         return res.redirect(req.get("Referrer"));
       }
       const parentId = req.params.folderId
         ? parseInt(req.params.folderId)
         : null;
+      console.log(parentId);
       await db.createFolder(req.body.folder, parentId);
       res.redirect(req.get("Referrer"));
     } catch (error) {
@@ -92,35 +105,6 @@ const getDeleteFolder = async (req, res, next) => {
     res.redirect(req.get("Referrer"));
   } catch (error) {
     console.error("There was an error deleting folder", error);
-    next(error);
-  }
-};
-
-const getDisplayRootFolders = async (req, res, next) => {
-  const folders = await db.getFoldersByParentId(null);
-  const files = await db.getFolderFiles(null);
-  res.render("index", {
-    isAuth: req.isAuthenticated(),
-    folders: folders,
-    files: files,
-    currentFolder: 0,
-  });
-};
-
-const getDisplayChildrenFolders = async (req, res, next) => {
-  try {
-    const folders = await db.getFoldersByParentId(
-      parseInt(req.params.folderId)
-    );
-    const files = await db.getFolderFiles(parseInt(req.params.folderId));
-    res.render("index", {
-      isAuth: req.isAuthenticated(),
-      folders: folders,
-      files: files,
-      currentFolder: req.params.folderId,
-    });
-  } catch (error) {
-    console.error("There was an error displaying children folders", error);
     next(error);
   }
 };
@@ -168,8 +152,7 @@ module.exports = {
   postCloudinaryUpload,
   postNewFolder,
   getDeleteFolder,
-  getDisplayRootFolders,
-  getDisplayChildrenFolders,
+  getDisplayFolderContent,
   getUpdateFolder,
   postUpdateFolder,
   postFileUploadToDb,

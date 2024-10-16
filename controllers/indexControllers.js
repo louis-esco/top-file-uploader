@@ -1,5 +1,3 @@
-const db = require("../prisma/queries");
-
 const getIndex = async (req, res, next) => {
   try {
     if (!req.isAuthenticated()) return res.redirect("/log-in");
