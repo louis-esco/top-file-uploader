@@ -1,15 +1,7 @@
 const db = require("../prisma/queries");
 const { body, validationResult } = require("express-validator");
-const multer = require("multer");
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
+const { multerUpload } = require("../multer/multer");
+const { cloudinary } = require("../cloudinary/cloudinary");
 
 const validateFolder = [
   body("folder")
@@ -20,12 +12,56 @@ const validateFolder = [
     .withMessage("Name must contain only letters and numbers"),
 ];
 
-const postUpload = async (req, res, next) => {
+const postMulterUpload = async (req, res, next) => {
   try {
-    upload.single("uploaded_file")(req, res, next);
-    res.redirect("/");
+    multerUpload.single("uploaded_file")(req, res, next);
   } catch (error) {
-    console.error("There was an error uploading file", error);
+    console.error("There was an error uploading file with multer", error);
+    next(error);
+  }
+};
+
+const postCloudinaryUpload = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400);
+    const fileName = Buffer.from(req.file.originalname, "latin1")
+      .toString("utf8")
+      .split(".")
+      .slice(0, -1)
+      .join(".");
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    const result = await cloudinary.uploader.upload(dataURI, {
+      public_id: fileName,
+      display_name: req.file.originalname,
+      unique_filename: false,
+      overwrite: true,
+    });
+    res.locals.file = result;
+    return next();
+  } catch (error) {
+    console.error("There was an error in cloudinary upload", error);
+    next(error);
+  }
+};
+
+const postFileUploadToDb = async (req, res, next) => {
+  try {
+    const folderId =
+      req.params.folderId === "0" ? null : parseInt(req.params.folderId);
+    const dlUrl = cloudinary.url(res.locals.file.public_id, {
+      flags: "attachment",
+    });
+    const file = {
+      name: res.locals.file.public_id,
+      size: res.locals.file.bytes,
+      url: dlUrl,
+      folderId: folderId,
+    };
+    await db.createFile(file);
+    res.redirect(req.get("Referrer"));
+  } catch (error) {
+    console.error("There was an error posting uploaded file in db", error);
     next(error);
   }
 };
@@ -35,7 +71,6 @@ const postNewFolder = [
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      console.log(errors);
       if (!errors.isEmpty()) {
         return res.redirect(req.get("Referrer"));
       }
@@ -63,18 +98,25 @@ const getDeleteFolder = async (req, res, next) => {
 
 const getDisplayRootFolders = async (req, res, next) => {
   const folders = await db.getFoldersByParentId(null);
+  const files = await db.getFolderFiles(null);
   res.render("index", {
     isAuth: req.isAuthenticated(),
     folders: folders,
+    files: files,
+    currentFolder: 0,
   });
 };
 
 const getDisplayChildrenFolders = async (req, res, next) => {
   try {
-    const folders = await db.getChildrenFolders(parseInt(req.params.folderId));
+    const folders = await db.getFoldersByParentId(
+      parseInt(req.params.folderId)
+    );
+    const files = await db.getFolderFiles(parseInt(req.params.folderId));
     res.render("index", {
       isAuth: req.isAuthenticated(),
       folders: folders,
+      files: files,
       currentFolder: req.params.folderId,
     });
   } catch (error) {
@@ -122,11 +164,13 @@ const postUpdateFolder = [
 ];
 
 module.exports = {
-  postUpload,
+  postMulterUpload,
+  postCloudinaryUpload,
   postNewFolder,
   getDeleteFolder,
   getDisplayRootFolders,
   getDisplayChildrenFolders,
   getUpdateFolder,
   postUpdateFolder,
+  postFileUploadToDb,
 };

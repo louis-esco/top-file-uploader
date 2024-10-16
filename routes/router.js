@@ -19,7 +19,12 @@ router.get("/log-out", authControllers.getLogout);
 // Protected routes for authenticated users
 router.use(authControllers.isAuth);
 
-router.post("/upload", filesControllers.postUpload);
+router.post(
+  "/upload/:folderId",
+  filesControllers.postMulterUpload,
+  filesControllers.postCloudinaryUpload,
+  filesControllers.postFileUploadToDb
+);
 
 router.get("/folder", filesControllers.getDisplayRootFolders);
 router.get("/folder/:folderId", filesControllers.getDisplayChildrenFolders);

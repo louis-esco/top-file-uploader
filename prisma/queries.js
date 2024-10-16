@@ -128,16 +128,45 @@ module.exports = {
       throw error;
     }
   },
-  getChildrenFolders: async (folderId) => {
+  getFolderFiles: async (folderId) => {
     try {
-      const folders = await prisma.folder.findMany({
+      const files = await prisma.file.findMany({
         where: {
-          parentId: folderId,
+          folderId: folderId,
         },
       });
-      return folders;
+      return files;
     } catch (error) {
-      console.error("There was an error getting children folders in db", error);
+      console.error("There was an error getting folder files in db", error);
+      throw error;
+    }
+  },
+  createFile: async (file) => {
+    try {
+      const response = await prisma.file.create({
+        data: {
+          name: file.name,
+          size: file.size,
+          link: file.url,
+          folderId: file.folderId,
+        },
+      });
+      return response;
+    } catch (error) {
+      console.error("There was an error creating file in db", error);
+      throw error;
+    }
+  },
+  getFileFromId: async (fileId) => {
+    try {
+      const file = await prisma.file.findUnique({
+        where: {
+          id: fileId,
+        },
+      });
+      return file;
+    } catch (error) {
+      console.error("There was an error getting file in db", error);
       throw error;
     }
   },

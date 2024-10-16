@@ -1,5 +1,9 @@
 <section>
-  <form action="/upload" method="post" enctype="multipart/form-data">
+  <form
+    action="/upload/<%= currentFolder %>"
+    method="post"
+    enctype="multipart/form-data"
+  >
     <label for="uploaded_file">Upload new file: </label>
     <input type="file" name="uploaded_file" id="uploaded_file" />
     <button type="submit">Submit</button>

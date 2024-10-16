@@ -4,5 +4,12 @@
   <a href="/folder/<%= folder.id %>"><button>Display content</button></a>
   <a href="/delete-folder/<%= folder.id %>"><button>Delete folder</button></a>
   <a href="/update-folder/<%= folder.id %>"><button>Update folder</button></a>
+  <% }) %> <% files.forEach((file) => {%>
+  <div>Name: <%= file.name %></div>
+  <div>Size: <%= file.size %> bytes</div>
+  <div>Uploaded at: <%= file.uploadTime %></div>
+  <a href="<%= file.link %>" download="<%= file.link %>"
+    ><button>Download file</button></a
+  >
   <% }) %>
 </section>
