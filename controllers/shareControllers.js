@@ -21,7 +21,7 @@ const getAuthorizedFoldersIds = async (folderId) => {
   if (!childrenArray.length) return [folderId];
 
   const childResults = await Promise.all(
-    childrenArray.map((childId) => getChildrenRecursive(childId))
+    childrenArray.map((childId) => getAuthorizedFoldersIds(childId))
   );
 
   return [folderId, ...childResults.flat()];
@@ -49,7 +49,9 @@ const postCreateShareLink = [
   validateDuration,
   async (req, res, next) => {
     try {
-      const currentFolder = req.params.folderId ? req.params.folderId : null;
+      const currentFolder = req.params.folderId
+        ? parseInt(req.params.folderId)
+        : null;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).render("./share-link/create-share-link", {
@@ -65,8 +67,8 @@ const postCreateShareLink = [
         ? parseInt(req.params.folderId)
         : null;
 
-      const authorizedFolders = rootFolder
-        ? await getAuthorizedFoldersIds(rootFolder)
+      const authorizedFolders = currentFolder
+        ? await getAuthorizedFoldersIds(currentFolder)
         : await getAllFoldersIds();
 
       const link = {
@@ -98,12 +100,18 @@ const getDisplaySharedFolderContent = async (req, res, next) => {
   try {
     const sharedFolder = await db.getFolderByShareCode(req.params.shareCode);
 
+    // If shareCode isn't valid, redirect to home page
     if (!sharedFolder || sharedFolder.expires.getTime() < new Date().getTime())
       return res.redirect("/");
 
     const folderId = req.params.folderId
       ? parseInt(req.params.folderId)
       : sharedFolder.folderId;
+
+    // If folderId isn't in the list of authorized folders
+    if (folderId && !sharedFolder.authorizedFolders.includes(folderId))
+      return res.redirect("/");
+
     const folders = await db.getFoldersByParentId(folderId);
     const files = await db.getFolderFiles(folderId);
     const sharePrefix = "/share/" + req.params.shareCode;
