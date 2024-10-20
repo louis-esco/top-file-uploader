@@ -38,3 +38,11 @@ model File {
   folderId   Int?
   folder     Folder?  @relation(fields: [folderId], references: [id])
 }
+
+model Link {
+  id                Int      @id @default(autoincrement())
+  folderId          Int?
+  authorizedFolders Int[]
+  shareCode         String   @unique
+  expires           DateTime
+}
