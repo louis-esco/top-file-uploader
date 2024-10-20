@@ -82,14 +82,12 @@ const postNewFolder = [
   async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      console.log(errors);
       if (!errors.isEmpty()) {
         return res.redirect(req.get("Referrer"));
       }
       const parentId = req.params.folderId
         ? parseInt(req.params.folderId)
         : null;
-      console.log(parentId);
       await db.createFolder(req.body.folder, parentId);
       res.redirect(req.get("Referrer"));
     } catch (error) {
