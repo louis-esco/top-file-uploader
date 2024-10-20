@@ -26,7 +26,7 @@ module.exports = {
       });
       return user;
     } catch (error) {
-      console.log("There was an error finding user in db", error);
+      console.error("There was an error finding user in db", error);
       throw error;
     }
   },
@@ -39,7 +39,7 @@ module.exports = {
       });
       return user;
     } catch (error) {
-      console.log("There was an error finding user in db", error);
+      console.error("There was an error finding user in db", error);
       throw error;
     }
   },
@@ -73,10 +73,24 @@ module.exports = {
         where: {
           id: folderId,
         },
+        include: {
+          parent: true,
+          children: true,
+          file: true,
+        },
       });
       return folder;
     } catch (error) {
       console.error("There was an error getting folder in db", error);
+      throw error;
+    }
+  },
+  getAllFolders: async () => {
+    try {
+      const folders = await prisma.folder.findMany();
+      return folders;
+    } catch (error) {
+      console.error("There was an error getting all folders in db", error);
       throw error;
     }
   },
@@ -157,6 +171,22 @@ module.exports = {
       throw error;
     }
   },
+  createShareLink: async (link) => {
+    try {
+      const response = await prisma.link.create({
+        data: {
+          folderId: link.folderId,
+          authorizedFolders: link.authorizedFolders,
+          shareCode: link.shareCode,
+          expires: link.expires,
+        },
+      });
+      return response;
+    } catch (error) {
+      console.error("There was an error creating share link in db", error);
+      throw error;
+    }
+  },
   getFileFromId: async (fileId) => {
     try {
       const file = await prisma.file.findUnique({
@@ -167,6 +197,22 @@ module.exports = {
       return file;
     } catch (error) {
       console.error("There was an error getting file in db", error);
+      throw error;
+    }
+  },
+  getFolderByShareCode: async (shareCode) => {
+    try {
+      const folder = prisma.link.findUnique({
+        where: {
+          shareCode: shareCode,
+        },
+      });
+      return folder;
+    } catch (error) {
+      console.error(
+        "There was an error getting folder by share code in db",
+        error
+      );
       throw error;
     }
   },
