@@ -26,5 +26,4 @@ Deployed at: https://top-file-uploader.onrender.com
 
 ## Notes
 - No CSS styling, the purpose of the project being mainly focused on the back-end
-- 
   
